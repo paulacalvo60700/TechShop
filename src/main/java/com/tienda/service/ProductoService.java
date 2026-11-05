@@ -28,6 +28,10 @@ public class ProductoService {
     public Optional<Producto> getProducto(Integer idProducto) {
         return productoRepository.findById(idProducto);
     }
+    @Transactional
+    public void save(Producto producto) {
+        producto = productoRepository.save(producto);    
+    }
 
     @Transactional
     public void delete(Integer idProducto) {

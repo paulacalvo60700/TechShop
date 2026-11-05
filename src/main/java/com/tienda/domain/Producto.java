@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import lombok.Data;
+import java.util.List;
 
 @Data
 @Entity
@@ -42,6 +43,5 @@ public class Producto implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "id_categoria")
-    private Producto categoria;
-
+    private Categoria categoria;
 }
