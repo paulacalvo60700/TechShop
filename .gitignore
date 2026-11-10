@@ -14,3 +14,6 @@
 .env
 .env.*
 .idea/
+
+# Claves MySQL de la computadora, nunca subir a GitHub
+/config/techshop-local.properties

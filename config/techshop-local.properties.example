@@ -1,0 +1,3 @@
+# Copiá este archivo como config/techshop-local.properties
+# Y cambiá la contraseña por la que elegiste en MySQL.
+spring.datasource.password=ESCRIBIR_AQUI_LA_CLAVE_MYSQL
