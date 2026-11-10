@@ -1,0 +1,16 @@
+# Compilación Maven y ajustes locales de IDE
+/target/
+**/target/
+/nbproject/private/
+*.log
+.DS_Store
+**/.DS_Store
+# Archivos runtime (no subir datos personales ni imágenes subidas)
+/data/
+/uploads/
+*.mv.db
+*.trace.db
+# Configuración personal
+.env
+.env.*
+.idea/

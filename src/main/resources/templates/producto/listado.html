@@ -1,22 +1,7 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
-
-    <head th:replace="~{general/fragmentos :: head}"></head>
-
-    <body>
-
-        <header th:replace="~{general/fragmentos :: header}"></header>
-
-        <section th:replace="~{producto/fragmentos :: agregar}"></section>
-<section th:replace="~{producto/fragmentos :: confirmarEliminar}"></section>
-
-<section th:replace="~{general/fragmentos :: mostrarToast}"></section>
-        <section th:replace="~{producto/fragmentos :: listado}"></section>
-
-        <footer th:replace="~{general/fragmentos :: footer}"></footer>
-
-    </body>
-
-</html>
+<!DOCTYPE html><html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"><head th:replace="~{general/fragmentos :: head}"></head><body><header th:replace="~{general/fragmentos :: header}"></header><div th:replace="~{general/fragmentos :: flash}"></div><main class="container py-4">
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4"><div><h1 class="h2 section-title mb-1">Listado de productos</h1><span class="small-muted">Total: <strong th:text="${totalProductos}"></strong></span></div><a class="btn btn-success" sec:authorize="hasRole('ADMIN')" th:href="@{/producto/nuevo}"><i class="fa-solid fa-plus me-1"></i>Agregar producto</a></div>
+<div class="card shadow-sm"><div class="card-body table-responsive"><table class="table table-striped table-hover align-middle"><thead><tr><th>ID</th><th>Producto</th><th>Categoría</th><th>Precio</th><th>Existencias</th><th>Estado</th><th>Imagen</th><th sec:authorize="hasRole('ADMIN')">Acciones</th></tr></thead><tbody>
+<tr th:each="p : ${productos}"><td th:text="${p.idProducto}"></td><td><strong th:text="${p.descripcion}"></strong><div class="small-muted" th:text="${p.detalle}"></div></td><td th:text="${p.categoria.descripcion}"></td><td th:text="'₡' + ${#numbers.formatDecimal(p.precio,1,'POINT',2,'COMMA')}"></td><td th:text="${p.existencias}"></td><td><span class="badge" th:classappend="${p.activo} ? ' text-bg-success':' text-bg-secondary'" th:text="${p.activo} ? 'Activo' : 'Inactivo'"></span></td><td><img th:if="${p.rutaImagen != null}" th:src="@{${p.rutaImagen}}" height="50" alt="Imagen del producto"><span th:unless="${p.rutaImagen != null}" class="small text-muted">Sin imagen</span></td>
+<td sec:authorize="hasRole('ADMIN')"><div class="d-flex gap-2"><a class="btn btn-warning btn-sm" th:href="@{/producto/modificar/{id}(id=${p.idProducto})}">Editar</a><form method="post" th:action="@{/producto/eliminar}" onsubmit="return confirm('¿Eliminar este producto?');"><input type="hidden" name="idProducto" th:value="${p.idProducto}"><button class="btn btn-outline-danger btn-sm" type="submit">Eliminar</button></form></div></td>
+</tr></tbody></table><p class="text-center text-muted my-3" th:if="${#lists.isEmpty(productos)}">No hay productos registrados.</p></div></div>
+</main><footer th:replace="~{general/fragmentos :: footer}"></footer></body></html>

@@ -2,7 +2,6 @@ package com.tienda.service;
 
 import com.tienda.domain.Categoria;
 import com.tienda.repository.CategoriaRepository;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -12,44 +11,44 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class CategoriaService {
+    private final CategoriaRepository categorias;
+    private final LocalImageService imagenes;
 
-    // El repositorio es final para asegurar la inmutabilidad
-    private final CategoriaRepository categoriaRepository;
-
-    public CategoriaService(CategoriaRepository categoriaRepository) {
-        this.categoriaRepository = categoriaRepository;
+    public CategoriaService(CategoriaRepository categorias, LocalImageService imagenes) {
+        this.categorias = categorias;
+        this.imagenes = imagenes;
     }
 
     @Transactional(readOnly = true)
-    public List<Categoria> getCategorias(boolean activo) {
-        if (activo) { //Sólo activos...            
-            return categoriaRepository.findByActivoTrue();
-        }
-        return categoriaRepository.findAll();
+    public List<Categoria> getCategorias(boolean soloActivas) {
+        return soloActivas ? categorias.findByActivoTrue() : categorias.findAll();
     }
 
     @Transactional(readOnly = true)
-    public Optional<Categoria> getCategoria(Integer idCategoria) {
-        return categoriaRepository.findById(idCategoria);
+    public Optional<Categoria> getCategoria(Integer id) {
+        return categorias.findById(id);
     }
 
     @Transactional
-    public void save(Categoria categoria) {
-        categoria = categoriaRepository.save(categoria);    
-    }
-
-    @Transactional
-    public void delete(Integer idCategoria) {
-        // Verifica si la categoría existe antes de intentar eliminarlo
-        if (!categoriaRepository.existsById(idCategoria)) {
-            // Lanza una excepción para indicar que el usuario no fue encontrado
-            throw new IllegalArgumentException("La categoría con ID " + idCategoria + " no existe.");
+    public void save(Categoria categoria, MultipartFile imagenFile) {
+        if (categoria.getIdCategoria() != null) {
+            Categoria anterior = categorias.findById(categoria.getIdCategoria())
+                    .orElseThrow(() -> new IllegalArgumentException("La categoría no existe."));
+            categoria.setRutaImagen(anterior.getRutaImagen());
         }
+        String rutaNueva = imagenes.guardar(imagenFile);
+        if (rutaNueva != null) categoria.setRutaImagen(rutaNueva);
+        categorias.save(categoria);
+    }
+
+    @Transactional
+    public void delete(Integer id) {
+        if (!categorias.existsById(id)) throw new IllegalArgumentException("La categoría no existe.");
         try {
-            categoriaRepository.deleteById(idCategoria);
-        } catch (DataIntegrityViolationException e) {
-            // Lanza una nueva excepción para encapsular el problema de integridad de datos
-            throw new IllegalStateException("No se puede eliminar la categoria. Tiene datos asociados.", e);
+            categorias.deleteById(id);
+            categorias.flush();
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalStateException("No se puede eliminar la categoría porque tiene productos asociados.", ex);
         }
     }
 }

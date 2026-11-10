@@ -1,0 +1,10 @@
+/* SC-403: solo estilos mínimos. El resto utiliza Bootstrap, como las filminas. */
+body { background-color: #fff; color: #212529; }
+.navbar-brand { font-weight: 600; }
+.tienda-encabezado { padding: 16px 12px; background-color: #198754; color: #fff; }
+.nav-underline .nav-link { color: #495057; }
+.nav-underline .nav-link.active { color: #198754; }
+.producto-imagen { height: 200px; }
+.producto-imagen img { max-height: 100%; object-fit: contain; }
+.card { border-radius: 3px; }
+.card-header, .card-footer { border-radius: 0 !important; }

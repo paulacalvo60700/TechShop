@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head th:replace="~{general/fragmentos :: head}"></head>
+<body>
+    <header th:replace="~{general/fragmentos :: header}"></header>
+    <main>
+        <div class="container mt-4"><h2 class="h5">Consultas de productos por precio</h2></div>
+        <div th:replace="~{consultas/fragmentos :: consultas}"></div>
+        <div class="container mt-2">
+            <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+            <div th:if="${tipoConsulta}" class="alert alert-info py-2">
+                Resultado de la consulta: <strong th:text="${tipoConsulta}"></strong>
+            </div>
+        </div>
+        <section th:replace="~{consultas/fragmentos :: tarjetas}"></section>
+    </main>
+    <footer th:replace="~{general/fragmentos :: footer}"></footer>
+</body>
+</html>

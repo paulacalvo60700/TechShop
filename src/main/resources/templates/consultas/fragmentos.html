@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<body>
+    <!-- Semana 6: pestañas para navegar las categorías. -->
+    <section th:fragment="tabs" class="py-3">
+        <ul class="nav nav-underline justify-content-center flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/}" th:classappend="${idCategoriaActual == null} ? 'active' : ''">Todos</a>
+            </li>
+            <li class="nav-item" th:each="c : ${categorias}">
+                <a class="nav-link" th:href="@{/consultas/{id}(id=${c.idCategoria})}"
+                   th:classappend="${idCategoriaActual != null and idCategoriaActual.equals(c.idCategoria)} ? 'active' : ''"
+                   th:text="${c.descripcion}">Categoría</a>
+            </li>
+        </ul>
+    </section>
+
+    <!-- Semana 6: tarjetas como las del ejemplo del profesor. -->
+    <section th:fragment="tarjetas" class="container py-3">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+            <div th:each="p : ${productos}" class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="producto-imagen d-flex justify-content-center align-items-center bg-light p-3">
+                        <img th:if="${p.rutaImagen != null and !#strings.isEmpty(p.rutaImagen)}"
+                             th:src="@{${p.rutaImagen}}" th:alt="${p.descripcion}" class="img-fluid">
+                        <i th:unless="${p.rutaImagen != null and !#strings.isEmpty(p.rutaImagen)}"
+                           class="fa-solid fa-desktop fa-4x text-secondary" aria-hidden="true"></i>
+                    </div>
+                    <div class="card-header bg-white text-center">
+                        <h2 class="h6 mb-0" th:text="${p.descripcion}">Producto</h2>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text text-muted" th:text="${p.detalle}">Descripción del producto</p>
+                    </div>
+                    <div class="card-footer bg-white d-flex justify-content-between align-items-center gap-2 flex-wrap">
+                        <div>
+                            <strong class="text-success" th:text="'₡' + ${#numbers.formatDecimal(p.precio,1,'POINT',2,'COMMA')}">₡0</strong>
+                            <span th:if="${p.existencias > 0}" class="badge text-bg-success d-block mt-1"
+                                  th:text="${p.existencias} + ' disponibles'">Disponible</span>
+                            <span th:unless="${p.existencias > 0}" class="badge text-bg-danger d-block mt-1">Agotado</span>
+                        </div>
+                        <form sec:authorize="hasAnyRole('ADMIN','USUARIO')" method="post" th:action="@{/carrito/agregar}">
+                            <input type="hidden" name="idProducto" th:value="${p.idProducto}">
+                            <button type="submit" class="btn btn-primary btn-sm" th:disabled="${p.existencias == 0}"
+                                    aria-label="Agregar al carrito"><i class="fa-solid fa-cart-plus"></i></button>
+                        </form>
+                        <a sec:authorize="isAnonymous()" th:href="@{/login}" class="btn btn-outline-primary btn-sm">Ingresar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p class="alert alert-info text-center" th:if="${#lists.isEmpty(productos)}">No hay productos para mostrar.</p>
+    </section>
+
+    <!-- Semana 8: tres formularios (consulta derivada, JPQL y SQL) -->
+    <section th:fragment="consultas" class="container py-3">
+        <div class="row row-cols-1 row-cols-md-3 g-3">
+            <div th:replace="~{consultas/fragmentos :: formConsulta('primary','Consulta derivada','/consultas/consultaDerivada')}"></div>
+            <div th:replace="~{consultas/fragmentos :: formConsulta('warning','Consulta JPQL','/consultas/consultaJPQL')}"></div>
+            <div th:replace="~{consultas/fragmentos :: formConsulta('success','Consulta SQL','/consultas/consultaSQL')}"></div>
+        </div>
+    </section>
+
+    <div th:fragment="formConsulta(colorForm, textoForm, urlForm)" class="col">
+        <form method="post" th:action="@{${urlForm}}">
+            <div class="card h-100">
+                <div class="card-header text-white text-center" th:classappend="'bg-' + ${colorForm}">
+                    <h2 class="h6 mb-0" th:text="${textoForm}">Consulta</h2>
+                </div>
+                <div class="card-body">
+                    <label class="form-label">Precio inferior</label>
+                    <input type="number" name="precioInf" min="0" step="0.01" required class="form-control mb-3"
+                           th:value="${precioInf}">
+                    <label class="form-label">Precio superior</label>
+                    <input type="number" name="precioSup" min="0" step="0.01" required class="form-control"
+                           th:value="${precioSup}">
+                </div>
+                <div class="card-footer text-center">
+                    <button type="submit" class="btn" th:classappend="'btn-' + ${colorForm}">
+                        <i class="fa-solid fa-magnifying-glass"></i> <span th:text="${textoForm}">Buscar</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
