@@ -7,39 +7,48 @@ import java.util.Optional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
-@Transactional(readOnly = true)
 public class CategoriaService {
+    private final CategoriaRepository categorias;
+    private final LocalImageService imagenes;
 
-    private final CategoriaRepository categoriaRepository;
-
-    public CategoriaService(CategoriaRepository categoriaRepository) {
-        this.categoriaRepository = categoriaRepository;
+    public CategoriaService(CategoriaRepository categorias, LocalImageService imagenes) {
+        this.categorias = categorias;
+        this.imagenes = imagenes;
     }
 
-    public List<Categoria> getCategorias(boolean activo) {
-        if (activo) {
-            return categoriaRepository.findByActivoTrue();
-        }
-        return categoriaRepository.findAll();
+    @Transactional(readOnly = true)
+    public List<Categoria> getCategorias(boolean soloActivas) {
+        return soloActivas ? categorias.findByActivoTrue() : categorias.findAll();
     }
 
-    public Optional<Categoria> getCategoria(Integer idCategoria) {
-        return categoriaRepository.findById(idCategoria);
+    @Transactional(readOnly = true)
+    public Optional<Categoria> getCategoria(Integer id) {
+        return categorias.findById(id);
     }
 
     @Transactional
-    public void delete(Integer idCategoria) {
-        if (!categoriaRepository.existsById(idCategoria)) {
-            throw new IllegalArgumentException("La categoría con ID " + idCategoria + " no existe.");
+    public void save(Categoria categoria, MultipartFile imagenFile) {
+        if (categoria.getIdCategoria() != null) {
+            Categoria anterior = categorias.findById(categoria.getIdCategoria())
+                    .orElseThrow(() -> new IllegalArgumentException("La categoría no existe."));
+            categoria.setRutaImagen(anterior.getRutaImagen());
         }
-
-        try {
-            categoriaRepository.deleteById(idCategoria);
-        } catch (DataIntegrityViolationException e) {
-            throw new IllegalStateException("No se puede eliminar la categoria. Tiene datos asociados.", e);
-        }
+        String rutaNueva = imagenes.guardar(imagenFile);
+        if (rutaNueva != null) categoria.setRutaImagen(rutaNueva);
+        categorias.save(categoria);
     }
 
+    @Transactional
+    public void delete(Integer id) {
+        if (!categorias.existsById(id)) throw new IllegalArgumentException("La categoría no existe.");
+        try {
+            categorias.deleteById(id);
+            categorias.flush();
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalStateException("No se puede eliminar la categoría porque tiene productos asociados.", ex);
+        }
+    }
 }
